@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <AssemblyName>Lindhart.Utility.IO.Streaming</AssemblyName>
+    <RootNamespace>Lindhart.Utility.IO.Streaming</RootNamespace>
+  </PropertyGroup>
+
+</Project>
