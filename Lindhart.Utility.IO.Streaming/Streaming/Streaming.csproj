@@ -17,7 +17,7 @@
     <RepositoryUrl>https://github.com/ykoksen/stream-utilities</RepositoryUrl>
     <SignAssembly>true</SignAssembly>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <AssemblyOriginatorKeyFile>LindhartKey.pfx</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>LindhartKey.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
 
 </Project>
