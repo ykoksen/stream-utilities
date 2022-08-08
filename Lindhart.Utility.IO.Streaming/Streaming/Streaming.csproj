@@ -11,7 +11,7 @@
     <Authors>Morten Hartlev Lindhart</Authors>
     <Company />
     <Product>Stream utility</Product>
-    <Description>Small project containing utilities for working with the Stream class in C#. Currently only holds an abstract DelegatingStream class that can be used for easier overload of single methods. Ex. if you want to be notified when a Stream is disposed you can use this to only overload the virtual Dispose method - delegating all other methods to the original Stream.</Description>
+	<PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageTags>Lindhart.Utility.IO.Streaming, Stream</PackageTags>
     <RepositoryType>git (GitHub)</RepositoryType>
     <RepositoryUrl>https://github.com/ykoksen/stream-utilities</RepositoryUrl>
