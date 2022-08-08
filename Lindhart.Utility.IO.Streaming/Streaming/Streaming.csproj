@@ -11,7 +11,7 @@
     <Authors>Morten Hartlev Lindhart</Authors>
     <Company />
     <Product>Stream utility</Product>
-	<PackageReadmeFile>README.md</PackageReadmeFile>
+	<PackageReadmeFile>../../README.md</PackageReadmeFile>
     <PackageTags>Lindhart.Utility.IO.Streaming, Stream</PackageTags>
     <RepositoryType>git (GitHub)</RepositoryType>
     <RepositoryUrl>https://github.com/ykoksen/stream-utilities</RepositoryUrl>
