@@ -16,6 +16,8 @@
     <RepositoryType>git (GitHub)</RepositoryType>
     <RepositoryUrl>https://github.com/ykoksen/stream-utilities</RepositoryUrl>
     <SignAssembly>true</SignAssembly>
+	<Description>Small project containing utilities for working with the Stream class in C#. Currently holds two utilities. Firstly a DelegatingStream class that can be used if you want to override or have hooks into a Stream. 
+	Secondly a TestReadStream class that is usefull for testing real world Stream scenarios.</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <AssemblyOriginatorKeyFile>LindhartKey.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
