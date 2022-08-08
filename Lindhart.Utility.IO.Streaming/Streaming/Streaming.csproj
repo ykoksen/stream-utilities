@@ -21,8 +21,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="..\..\README.md" Link="README.md">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    <None Include="..\..\README.md" Link="README.md" Pack="true" > 
     </None>
   </ItemGroup>
 </Project>
