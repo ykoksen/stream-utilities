@@ -20,7 +20,7 @@ namespace Streaming.Test
             testStream.Position = 0;
 
             await using var testReadStream = new TestReadStream(testStream);
-            await using var compressed = new StreamConverter(testReadStream, s => new GZipStream(s, CompressionLevel.Optimal, true));
+            await using var compressed = new StreamInverter(testReadStream, s => new GZipStream(s, CompressionLevel.Optimal, true));
 
             await compressed.CopyToAsync(testCompressedStream, 8000);
 

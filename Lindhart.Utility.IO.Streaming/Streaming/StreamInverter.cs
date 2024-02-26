@@ -7,12 +7,12 @@ namespace Lindhart.Utility.IO.Streaming
 {
     public delegate Stream StreamConstructor(Stream outputStream);
 
-    public sealed class StreamConverter : Stream
+    public sealed class StreamInverter : Stream
     {
 
         #region constructor / cleanup
 
-        public StreamConverter(Stream inputStream, StreamConstructor constructor)
+        public StreamInverter(Stream inputStream, StreamConstructor constructor)
         {
             try
             {

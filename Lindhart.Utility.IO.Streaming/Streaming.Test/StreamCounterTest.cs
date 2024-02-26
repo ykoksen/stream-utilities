@@ -16,7 +16,7 @@ namespace Streaming.Test
         {
             // Setup
             using LargeTestStream testStream = new(length);
-            using var subject = new StreamCounter(testStream);
+            using var subject = new StreamCounter(new StupidStream(testStream));
 
             // Act
             await subject.CopyToAsync(Stream.Null);
