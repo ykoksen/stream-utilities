@@ -1,8 +1,11 @@
 ﻿using System;
 using System.IO;
 
-namespace Streaming.Test
+namespace Lindhart.Utility.IO.Streaming
 {
+    /// <summary>
+    /// To be used when wanting a <see cref="Stream"/> that only has sync methods. 
+    /// </summary>
     public class StupidStream : Stream
     {
         private readonly Stream _stream;

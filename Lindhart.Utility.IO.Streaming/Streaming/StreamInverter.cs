@@ -12,12 +12,27 @@ namespace Lindhart.Utility.IO.Streaming
 
         #region constructor / cleanup
 
+        /// <summary>
+        /// Use the <see cref="StreamConstructor"/> delegate to instantiate the constructor of the class that does the actual job.
+        /// </summary>
+        /// <param name="inputStream">The input <see cref="Stream"/> that will be read.</param>
+        /// <param name="constructor">The delegate that runs the constructor of the <see cref="Stream"/> that should do the actual work, and where the input and output streams are to be exchanged</param>
+        /// <example>
+        /// This example uses the <see cref="System.IO.Compression.GZipStream"/> which requires that the output <see cref="Stream"/> is a parameter in the constructor, and that the input is the <see cref="System.IO.Compression.GZipStream"/> itself.
+        /// This is reversed so the <see cref="StreamInverter"/> now is the compressed output, and the input is a parameter instead. 
+        /// <code>
+        /// public Stream GetCompressedStream(Stream input)
+        /// {
+        ///     return new StreamInverter(input, output => new GZipStream(output, CompressionLevel.Optimal, true));
+        /// }
+        /// </code>
+        /// </example>
         public StreamInverter(Stream inputStream, StreamConstructor constructor)
         {
             try
             {
                 _inputStream = inputStream;
-                _outputStream = new MemoryStream();
+                _outputStream = new NonDisposableMemoryStream();
                 _workerStream = constructor(_outputStream);
                 _inputBuffer = new byte[50_000];
                 _memoryBuffer = new Memory<byte>(_inputBuffer);
@@ -43,7 +58,7 @@ namespace Lindhart.Utility.IO.Streaming
         private bool EndOfInputStreamReached = false;
 
         private readonly Stream _inputStream;
-        private readonly MemoryStream _outputStream;
+        private readonly NonDisposableMemoryStream _outputStream;
         private readonly Stream _workerStream;
         private readonly byte[] _inputBuffer;
         private readonly Memory<byte> _memoryBuffer;
@@ -85,7 +100,7 @@ namespace Lindhart.Utility.IO.Streaming
                 {
                     EndOfInputStreamReached = true;
                     _workerStream.Flush();
-                    _workerStream.Dispose(); // because Flush() does not actually flush...
+                    _workerStream.Dispose(); // because Flush() might not actually flush (ex. on DeflateStream, where only Dispose actually flushes)
                 }
                 else
                 {
@@ -162,5 +177,28 @@ namespace Lindhart.Utility.IO.Streaming
 
         #endregion
 
+        private class NonDisposableMemoryStream : MemoryStream
+        {
+            public NonDisposableMemoryStream() :base()
+            { }
+
+            protected override void Dispose(bool disposing)
+            {
+                // Do nothing. This is to avoid classes outside our control to dispose it.
+            }
+
+            public override ValueTask DisposeAsync()
+            {
+                // Do nothing. This is to avoid classes outside our control to dispose it.
+                return new ValueTask(Task.CompletedTask);
+            }
+
+            internal ValueTask DisposeInternAsync()
+            {
+                return base.DisposeAsync();
+            }
+        }
     }
+
+    
 }

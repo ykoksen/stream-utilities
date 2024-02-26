@@ -2,11 +2,10 @@ using System;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
-using Lindhart.Utility.IO.Streaming;
 using NSubstitute;
 using NUnit.Framework;
 
-namespace Streaming.Test
+namespace Lindhart.Utility.IO.Streaming
 {
     public class DelegatingStreamTest
     {
@@ -20,7 +19,7 @@ namespace Streaming.Test
             MemoryStream normalStream = new MemoryStream(bytes);
             CustomStreamWrapper wrapper = new CustomStreamWrapper(normalStream);
             using var reader = new StreamReader(wrapper);
-            
+
             // Act and assert
             Assert.That(await reader.ReadToEndAsync(), Is.EqualTo(testInput));
         }
