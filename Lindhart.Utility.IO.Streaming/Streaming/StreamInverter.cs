@@ -7,6 +7,9 @@ namespace Lindhart.Utility.IO.Streaming
 {
     public delegate Stream StreamConstructor(Stream outputStream);
 
+    /// <summary>
+    /// A class for inverting the output and input of a <see cref="Stream"/> that works on another <see cref="Stream"/>, example <see cref="GZipStream"/>. This class only supports reading. 
+    /// </summary>
     public sealed class StreamInverter : Stream
     {
 
