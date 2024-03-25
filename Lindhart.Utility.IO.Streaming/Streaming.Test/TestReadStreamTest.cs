@@ -4,10 +4,9 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Lindhart.Utility.IO.Streaming;
 using NUnit.Framework;
 
-namespace Streaming.Test
+namespace Lindhart.Utility.IO.Streaming
 {
     public class TestReadStreamTest
     {

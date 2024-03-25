@@ -3,7 +3,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Streaming.Test
+namespace Lindhart.Utility.IO.Streaming
 {
     public class LargeTestStream : Stream
     {
@@ -20,7 +20,7 @@ namespace Streaming.Test
         public long TotalBytes { get; }
 
         public long BytesRead => TotalBytes - _bytesLeft;
-                
+
         public override bool CanRead => true;
 
         public override bool CanSeek => false;

@@ -1,10 +1,9 @@
-﻿using Lindhart.Utility.IO.Streaming;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 using System;
 using System.IO;
 using System.Threading.Tasks;
 
-namespace Streaming.Test
+namespace Lindhart.Utility.IO.Streaming
 {
     public class StreamCounterTest
     {
@@ -16,7 +15,7 @@ namespace Streaming.Test
         {
             // Setup
             using LargeTestStream testStream = new(length);
-            using var subject = new StreamCounter(testStream);
+            using var subject = new StreamCounter(new StupidStream(testStream));
 
             // Act
             await subject.CopyToAsync(Stream.Null);
@@ -73,7 +72,7 @@ namespace Streaming.Test
             Assert.That(subject.BytesRead, Is.EqualTo(readCounter += 55));
 
             // Read using the old async methods
-            TaskCompletionSource<IAsyncResult> source = new ();
+            TaskCompletionSource<IAsyncResult> source = new();
             subject.BeginRead(new byte[50000], 234, 9384, r => source.SetResult(r), this);
             subject.EndRead(await source.Task);
             Assert.That(subject.BytesRead, Is.EqualTo(readCounter += 9384));
@@ -89,7 +88,7 @@ namespace Streaming.Test
             // Act + Assertions
 
             // Write byte
-            subject.WriteByte((byte)12);
+            subject.WriteByte(12);
             Assert.That(subject.BytesWritten, Is.EqualTo(++writeCounter));
 
             // Write array
