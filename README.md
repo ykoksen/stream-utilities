@@ -11,3 +11,6 @@ Usefull in scenarios where you want to test code that handles real world `Stream
 
 ## StreamCounter
 Can be usefull to track the number of bytes read or written. Rather usefull if you receive a `Stream` where you cannot determine length (ex. a file received via network), but you want to calculate it while you process it (ex. while saving it to a database).
+
+## StreamInverter
+Can reverse a Stream wrapper direction. Usefull if you have a Stream that takes an output Stream in the constructor, but you wanted it to take an input Stream instead. Ex. when using the Stream compression methods in .net (ex. [GZipStream](https://learn.microsoft.com/en-us/dotnet/api/system.io.compression.gzipstream?view=net-8.0)).
