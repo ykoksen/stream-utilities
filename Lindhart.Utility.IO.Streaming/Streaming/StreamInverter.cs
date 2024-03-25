@@ -12,6 +12,7 @@ namespace Lindhart.Utility.IO.Streaming
     /// </summary>
     public sealed class StreamInverter : Stream
     {
+        private const int DefaultBufferSize = 81920;
 
         #region constructor / cleanup
 
@@ -20,6 +21,7 @@ namespace Lindhart.Utility.IO.Streaming
         /// </summary>
         /// <param name="inputStream">The input <see cref="Stream"/> that will be read.</param>
         /// <param name="constructor">The delegate that runs the constructor of the <see cref="Stream"/> that should do the actual work, and where the input and output streams are to be exchanged</param>
+        /// <param name="bufferSize">The maximum size of the 2 buffers used internally. Normally the default value should just be used. The default value is 81920.</param>
         /// <example>
         /// This example uses the <see cref="System.IO.Compression.GZipStream"/> which requires that the output <see cref="Stream"/> is a parameter in the constructor, and that the input is the <see cref="System.IO.Compression.GZipStream"/> itself.
         /// This is reversed so the <see cref="StreamInverter"/> now is the compressed output, and the input is a parameter instead. 
@@ -30,28 +32,13 @@ namespace Lindhart.Utility.IO.Streaming
         /// }
         /// </code>
         /// </example>
-        public StreamInverter(Stream inputStream, StreamConstructor constructor)
+        public StreamInverter(Stream inputStream, StreamConstructor constructor, int bufferSize = DefaultBufferSize)
         {
-            try
-            {
                 _inputStream = inputStream;
                 _outputStream = new NonDisposableMemoryStream();
                 _workerStream = constructor(_outputStream);
-                _inputBuffer = new byte[50_000];
+                _inputBuffer = new byte[bufferSize];
                 _memoryBuffer = new Memory<byte>(_inputBuffer);
-            }
-            catch
-            {
-                Cleanup();
-                throw;
-            }
-        }
-
-        private void Cleanup()
-        {
-            _workerStream?.Dispose();
-            _outputStream?.Dispose();
-            _inputStream?.Dispose();
         }
 
         #endregion
@@ -130,8 +117,8 @@ namespace Lindhart.Utility.IO.Streaming
                 if (readCount == 0)
                 {
                     EndOfInputStreamReached = true;
-                    _workerStream.Flush();
-                    _workerStream.Dispose(); // because Flush() does not actually flush...
+                    await _workerStream.FlushAsync();
+                    await _workerStream.DisposeAsync(); // because Flush() might not actually flush(ex.on DeflateStream, where only Dispose actually flushes)
                 }
                 else
                 {
@@ -157,8 +144,8 @@ namespace Lindhart.Utility.IO.Streaming
                 if (readCount == 0)
                 {
                     EndOfInputStreamReached = true;
-                    _workerStream.Flush();
-                    _workerStream.Dispose(); // because Flush() does not actually flush...
+                    await _workerStream.FlushAsync();
+                    await _workerStream.DisposeAsync(); // because Flush() might not actually flush(ex.on DeflateStream, where only Dispose actually flushes)
                 }
                 else
                 {
@@ -175,7 +162,30 @@ namespace Lindhart.Utility.IO.Streaming
         {
             base.Dispose(disposing);
             if (disposing)
-                Cleanup();
+            {
+                _workerStream.Dispose();
+                _outputStream.Dispose();
+                _inputStream.Dispose();
+            }
+        }
+
+        public override async ValueTask DisposeAsync()
+        {
+            // Perform async cleanup.
+            await DisposeAsyncCore();
+
+            // Dispose of unmanaged resources.
+            Dispose(false);
+
+            // Suppress finalization.
+            GC.SuppressFinalize(this);
+        }
+
+        private async ValueTask DisposeAsyncCore()
+        {
+            await _workerStream.DisposeAsync();
+            await _outputStream.DisposeAsync();
+            await _inputStream.DisposeAsync();
         }
 
         #endregion
@@ -201,7 +211,5 @@ namespace Lindhart.Utility.IO.Streaming
                 return base.DisposeAsync();
             }
         }
-    }
-
-    
+    }    
 }
