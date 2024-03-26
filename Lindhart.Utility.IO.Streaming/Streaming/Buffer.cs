@@ -10,9 +10,16 @@ namespace Lindhart.Utility.IO.Streaming
     /// </summary>
     internal class Buffer
     {
-        private readonly byte[] _bufferBytes;
         private readonly int _bufferSize;
 
+        /// <summary>
+        /// Array of bytes that constitutes the buffer.
+        /// </summary>
+        private readonly byte[] _bufferBytes;
+
+        /// <summary>
+        /// This wraps the <see cref="_bufferBytes"/>. This is for convenience when reading.
+        /// </summary>
         private readonly MemoryStream _bufferStream;
 
         private readonly SemaphoreSlim _readBuffer;
@@ -51,7 +58,7 @@ namespace Lindhart.Utility.IO.Streaming
                 await _readBuffer.WaitAsync(token);
                 _readingInProgress = true;
             }
-
+            
             int readCount = await _bufferStream.ReadAsync(buffer, token);
 
             if (readCount == 0)
