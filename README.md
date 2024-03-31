@@ -14,3 +14,6 @@ Can be usefull to track the number of bytes read or written. Rather usefull if y
 
 ## StreamInverter
 Can reverse a Stream wrapper direction. Usefull if you have a Stream that takes an output Stream in the constructor, but you wanted it to take an input Stream instead. Ex. when using the Stream compression methods in .net (ex. [GZipStream](https://learn.microsoft.com/en-us/dotnet/api/system.io.compression.gzipstream?view=net-8.0)).
+
+## BufferBackgroundStream
+A double buffer stream that will allow reading from one buffer while filling the other in the background using a background thread. Usefull for paralizing multiple time consuming stream operations. Example if you both want to calculate hash for a Stream and then compress it. Or receive it via network, compress and store in database (here you might want to use this class twice).

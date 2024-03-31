@@ -7,14 +7,15 @@ namespace Lindhart.Utility.IO.Streaming
 {
     public class LargeTestStream : Stream
     {
-        private Random _random;
+        private readonly Func<Task> _readAsyncDelegate;
+        private readonly Random _random;
 
         private long _bytesLeft;
 
-        public LargeTestStream(long NumberOfBytes)
+        public LargeTestStream(long numberOfBytes)
         {
-            TotalBytes = _bytesLeft = NumberOfBytes;
-            _random = new Random();
+            TotalBytes = _bytesLeft = numberOfBytes;
+            _random = new Random();            
         }
 
         public long TotalBytes { get; }
@@ -54,12 +55,6 @@ namespace Lindhart.Utility.IO.Streaming
             _bytesLeft -= back;
 
             return back;
-        }
-
-        public override Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
-        {
-            var back = Read(buffer, offset, count);
-            return Task.FromResult(back);
         }
 
         public override long Seek(long offset, SeekOrigin origin)
