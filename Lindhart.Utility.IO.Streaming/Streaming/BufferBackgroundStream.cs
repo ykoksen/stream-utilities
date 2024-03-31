@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Drawing;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -12,14 +11,12 @@ namespace Lindhart.Utility.IO.Streaming
     /// </summary>
     public class BufferBackgroundStream : Stream
     {
-        private const int DefaultBufferSize = 100000;
+        private const int DefaultBufferSize = 100_000;
 
         /// <summary>
         /// The stream that is wrapped
         /// </summary>
         private readonly Stream _innerStream;
-
-        private readonly int _bufferSize;
 
         private readonly Buffer _buffer1;
         private readonly Buffer _buffer2;
@@ -35,19 +32,16 @@ namespace Lindhart.Utility.IO.Streaming
                 
         private long _position;
         
-        
-
         /// <summary>
         /// 
         /// </summary>
         /// <param name="innerStream">The <see cref="Stream"/> to wrap and read from.</param>
-        /// <param name="bufferSize">The size of the buffer. Note that double this size will be used since there will be a buffer to read from, while another buffer can be used in the background to fetch data in parallel.</param>
+        /// <param name="bufferSize">The size of the buffer. Note that double this size will be used since there will be a buffer to read from, while another buffer can be used in the background to fetch data in parallel. 
+        /// The default buffer size is 100 KB (thereby using 200 KB memory)</param>
         public BufferBackgroundStream(Stream innerStream, int bufferSize = DefaultBufferSize)
         {
             _buffer1ReadActive = true;
             _innerStream = innerStream;
-
-            _bufferSize = bufferSize;
 
             _buffer1 = new Buffer(bufferSize);
             _buffer2 = new Buffer(bufferSize);

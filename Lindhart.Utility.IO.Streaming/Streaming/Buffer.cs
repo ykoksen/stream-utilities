@@ -22,12 +22,18 @@ namespace Lindhart.Utility.IO.Streaming
         /// </summary>
         private readonly MemoryStream _bufferStream;
 
-        private readonly SemaphoreSlim _readBuffer;
 
+        // The buffer can either be read from or written to. Therefore we use the following two as locks.
+        // Before reading we obtain _readBuffer. When done reading we release _writeBuffer.
+        // Before writing we obtain _writeBuffer. When done writing we release _readBuffer.
+        private readonly SemaphoreSlim _readBuffer;
         private readonly SemaphoreSlim _writeBuffer;
 
         private bool _readingInProgress;
 
+        /// <summary>
+        /// Marks if the end of the consumed stream has been reached. 
+        /// </summary>
         public bool EndOfStream { get; private set; }
 
         public Buffer(int bufferSize)
@@ -78,12 +84,13 @@ namespace Lindhart.Utility.IO.Streaming
         /// <returns></returns>
         internal async Task WriteBuffer(Stream readFrom, CancellationToken token)
         {
-            // Wait until read is complete
+            // Wait until read is complete.
             await _writeBuffer.WaitAsync(token);
 
             int readCount = 0;
             int count;
 
+            // Read until the buffer is full or we've reached the end of the stream.
             do
             {
                 count = await readFrom.ReadAsync(_bufferBytes, readCount, _bufferSize - readCount, token);
