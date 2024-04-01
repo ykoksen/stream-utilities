@@ -1,13 +1,10 @@
 ﻿using System;
 using System.IO;
 using System.Threading;
-using System.Threading.Tasks;
-
 namespace Lindhart.Utility.IO.Streaming
 {
     public class LargeTestStream : Stream
     {
-        private readonly Func<Task> _readAsyncDelegate;
         private readonly Random _random;
 
         private long _bytesLeft;
