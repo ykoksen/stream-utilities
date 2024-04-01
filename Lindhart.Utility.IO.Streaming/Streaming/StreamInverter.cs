@@ -10,7 +10,7 @@ namespace Lindhart.Utility.IO.Streaming
     /// <summary>
     /// A class for inverting the output and input of a <see cref="Stream"/> that works on another <see cref="Stream"/>, example <see cref="GZipStream"/>. This class only supports reading. 
     /// </summary>
-    public sealed class StreamInverter : Stream
+    public sealed partial class StreamInverter : Stream
     {
         private const int DefaultBufferSize = 81920;
 
@@ -34,11 +34,12 @@ namespace Lindhart.Utility.IO.Streaming
         /// </example>
         public StreamInverter(Stream inputStream, StreamConstructor constructor, int bufferSize = DefaultBufferSize)
         {
-                _inputStream = inputStream;
-                _outputStream = new NonDisposableMemoryStream();
-                _workerStream = constructor(_outputStream);
-                _inputBuffer = new byte[bufferSize];
-                _memoryBuffer = new Memory<byte>(_inputBuffer);
+            _inputStream = inputStream;
+            _writeLock = new SemaphoreSlim(0, 1);
+            _outputStream = new DelegatingWriteLockStream(new NonDisposableMemoryStream(), _writeLock);
+            _workerStream = constructor(_outputStream);
+            _inputBuffer = new byte[bufferSize];
+            _memoryBuffer = new Memory<byte>(_inputBuffer);
         }
 
         #endregion
@@ -48,10 +49,15 @@ namespace Lindhart.Utility.IO.Streaming
         private bool EndOfInputStreamReached = false;
 
         private readonly Stream _inputStream;
-        private readonly NonDisposableMemoryStream _outputStream;
+        private readonly DelegatingWriteLockStream _outputStream;
         private readonly Stream _workerStream;
         private readonly byte[] _inputBuffer;
         private readonly Memory<byte> _memoryBuffer;
+
+        /// <summary>
+        /// This writelock is used in the temporary output Stream, so we ensure that we either write to it or read from it - not both at the same time.
+        /// </summary>
+        private readonly SemaphoreSlim _writeLock;
 
         #endregion
 
@@ -63,7 +69,7 @@ namespace Lindhart.Utility.IO.Streaming
 
         public override bool CanWrite => false;
 
-        public override long Length => 0;
+        public override long Length => throw new NotSupportedException();
 
         public override long Position { get => throw new NotSupportedException(); set => throw new NotSupportedException(); }
 
@@ -84,18 +90,22 @@ namespace Lindhart.Utility.IO.Streaming
                 // No unread data available in the output buffer
                 // -> release memory of output buffer and read new data from the source and feed through the pipeline
                 _outputStream.SetLength(0);
-                
+
                 var readCount = _inputStream.Read(_inputBuffer, 0, _inputBuffer.Length);
                 if (readCount == 0)
                 {
+                    // Allow to write to _outputStream - we are at the end anyways, and on flush and dispose everything should be written.
+                    _writeLock.Release();
                     EndOfInputStreamReached = true;
                     _workerStream.Flush();
                     _workerStream.Dispose(); // because Flush() might not actually flush (ex. on DeflateStream, where only Dispose actually flushes)
                 }
                 else
                 {
-
+                    // During these lines we allow to write to _outputStream
+                    _writeLock.Release();
                     _workerStream.Write(_inputBuffer, 0, readCount);
+                    _writeLock.Wait();
                 }
                 _outputStream.Position = 0;
             }
@@ -116,14 +126,18 @@ namespace Lindhart.Utility.IO.Streaming
                 var readCount = await _inputStream.ReadAsync(_inputBuffer, 0, _inputBuffer.Length, token);
                 if (readCount == 0)
                 {
+                    // Allow to write to _outputStream - we are at the end anyways, and on flush and dispose everything should be written.
+                    _writeLock.Release();
                     EndOfInputStreamReached = true;
                     await _workerStream.FlushAsync();
                     await _workerStream.DisposeAsync(); // because Flush() might not actually flush(ex.on DeflateStream, where only Dispose actually flushes)
                 }
                 else
                 {
-
+                    // During these lines we allow to write to _outputStream
+                    _writeLock.Release();
                     await _workerStream.WriteAsync(_inputBuffer, 0, readCount, token);
+                    await _writeLock.WaitAsync();
                 }
                 _outputStream.Position = 0;
             }
@@ -143,15 +157,20 @@ namespace Lindhart.Utility.IO.Streaming
                 var readCount = await _inputStream.ReadAsync(_memoryBuffer, token);
                 if (readCount == 0)
                 {
+                    // Allow to write to _outputStream - we are at the end anyways, and on flush and dispose everything should be written.
+                    _writeLock.Release();
                     EndOfInputStreamReached = true;
                     await _workerStream.FlushAsync();
                     await _workerStream.DisposeAsync(); // because Flush() might not actually flush(ex.on DeflateStream, where only Dispose actually flushes)
                 }
                 else
                 {
-
+                    // During these lines we allow to write to _outputStream
+                    _writeLock.Release();
                     await _workerStream.WriteAsync(_memoryBuffer[..readCount], token);
+                    await _writeLock.WaitAsync();
                 }
+
                 _outputStream.Position = 0;
             }
 
@@ -192,8 +211,9 @@ namespace Lindhart.Utility.IO.Streaming
 
         private class NonDisposableMemoryStream : MemoryStream
         {
-            public NonDisposableMemoryStream() :base()
-            { }
+            public NonDisposableMemoryStream() : base()
+            {
+            }
 
             protected override void Dispose(bool disposing)
             {
@@ -211,5 +231,5 @@ namespace Lindhart.Utility.IO.Streaming
                 return base.DisposeAsync();
             }
         }
-    }    
+    }
 }
