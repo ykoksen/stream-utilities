@@ -18,7 +18,7 @@ namespace Lindhart.Utility.IO.Streaming
             var numberOfCalls = 0;
             var stopReadingFromInnerStreamFlag = new TaskCompletionSource();
             var hasReadFourTimesFlag = new TaskCompletionSource();
-            var testInnerStream = new DelegateInAsyncReadStream(new LargeTestStream(100), async () =>
+            await using var testInnerStream = new DelegateInAsyncReadStream(new LargeTestStream(100), async () =>
             {
                 if (++numberOfCalls == 2) 
                 { 
@@ -31,7 +31,7 @@ namespace Lindhart.Utility.IO.Streaming
                 }
             });
 
-            var subject = new BufferBackgroundStream(testInnerStream, 50);
+            await using var subject = new BufferBackgroundStream(testInnerStream, 50);
 
             // Act
             // Should be able to do this twice, since we're reading from the buffer (this uses the first buffer)
@@ -65,11 +65,11 @@ namespace Lindhart.Utility.IO.Streaming
             var bytes = new byte[100_000];
             Random.Shared.NextBytes(bytes);
 
-            var underlyingStream = new TestReadStream(new MemoryStream(bytes));
+            await using var underlyingStream = new TestReadStream(new MemoryStream(bytes));
 
-            var subject = new BufferBackgroundStream(underlyingStream, 197);
+            await using var subject = new BufferBackgroundStream(underlyingStream, 197);
 
-            var outputStream = new MemoryStream();
+            await using var outputStream = new MemoryStream();
 
             // Act
             await subject.CopyToAsync(outputStream);
@@ -89,9 +89,9 @@ namespace Lindhart.Utility.IO.Streaming
             var bytes = new byte[100_000];
             Random.Shared.NextBytes(bytes);
 
-            var underlyingStream = new DelegateInAsyncReadStream(new TestReadStream(new MemoryStream(bytes)), async () => await Task.Delay(Random.Shared.Next(80)));
+            await using var underlyingStream = new DelegateInAsyncReadStream(new TestReadStream(new MemoryStream(bytes)), async () => await Task.Delay(Random.Shared.Next(80)));
 
-            var subject = new BufferBackgroundStream(underlyingStream, 9000);
+            await using var subject = new BufferBackgroundStream(underlyingStream, 9000);
 
             var outputStream = new MemoryStream();
 
@@ -104,11 +104,25 @@ namespace Lindhart.Utility.IO.Streaming
                 count = await subject.ReadAsync(readBuffer);
 
                 if (count != 0)
-                    await outputStream.WriteAsync(readBuffer.Slice(0, count));
+                    await outputStream.WriteAsync(readBuffer[..count]);
             }
 
             // Assert
             CollectionAssert.AreEqual(bytes, outputStream.ToArray());
+        }
+                
+        [Test]
+        public async Task Given_UnderlyingStreamThatReadsWithRandomDelay_When_DisposeSync_Then_NoExceptionOccurs()
+        {
+            // Setup
+            var bytes = new byte[100_000];
+            Random.Shared.NextBytes(bytes);
+
+            await using var underlyingStream = new DelegateInAsyncReadStream(new TestReadStream(new MemoryStream(bytes)), async () => await Task.Delay(Random.Shared.Next(80)));
+
+            var subject = new BufferBackgroundStream(underlyingStream, 9000);
+
+            Assert.DoesNotThrow(() => subject.Dispose());
         }
 
         private class DelegateInAsyncReadStream : DelegatingStream
