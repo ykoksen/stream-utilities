@@ -5,6 +5,10 @@ using System.Threading.Tasks;
 
 namespace Lindhart.Utility.IO.Streaming
 {
+    /// <summary>
+    /// A class to wrap around an existing <see cref="Stream"/>. This will enable processing content from the buffer, while a background thread is reading new bytes from the underlying <see cref="Stream"/>. 
+    /// This is especially usefull when reading from a network (hence <see cref="System.Net.Sockets.NetworkStream"/>) while wanting to do another time consuming job example compressing or calculating hash.
+    /// </summary>
     public class BufferBackgroundStream : Stream
     {
         private const int DefaultBufferSize = 100_000;
@@ -36,6 +40,12 @@ namespace Lindhart.Utility.IO.Streaming
             base.Close();
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="innerStream">The <see cref="Stream"/> to wrap and read from.</param>
+        /// <param name="bufferSize">The size of the buffer. Note that double this size will be used since there will be a buffer to read from, while another buffer can be used in the background to fetch data in parallel. 
+        /// The default buffer size is 100 KB (thereby using 200 KB memory)</param>
         public BufferBackgroundStream(Stream innerStream, int bufferSize = DefaultBufferSize)
         {
             _position = 0;
