@@ -18,7 +18,7 @@ namespace Lindhart.Utility.IO.Streaming
             var numberOfCalls = 0;
             var stopReadingFromInnerStreamFlag = new TaskCompletionSource();
             var hasReadFourTimesFlag = new TaskCompletionSource();
-            await using var testInnerStream = new DelegateInAsyncReadStream(new LargeTestStream(100), async () =>
+            await using var testInnerStream = new DelegateInAsyncReadStream(new TestLargeInputStream(100), async () =>
             {
                 if (++numberOfCalls == 2) 
                 { 
