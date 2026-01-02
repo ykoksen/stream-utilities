@@ -19,7 +19,6 @@
 	  <Description>Small project containing utilities for working with the Stream class in C#. </Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <AssemblyOriginatorKeyFile>LindhartKey.snk</AssemblyOriginatorKeyFile>
-        <    
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
   </PropertyGroup>
 
