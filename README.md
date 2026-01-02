@@ -12,8 +12,8 @@ Usefull in scenarios where you want to test code that handles real world `Stream
 ## StreamCounter
 Can be usefull to track the number of bytes read or written. Rather usefull if you receive a `Stream` where you cannot determine length (ex. a file received via network), but you want to calculate it while you process it (ex. while saving it to a database).
 
-## StreamInverter
-Can reverse a Stream wrapper direction. Usefull if you have a Stream that takes an output Stream in the constructor, but you wanted it to take an input Stream instead. Ex. when using the Stream compression methods in .net (ex. [GZipStream](https://learn.microsoft.com/en-us/dotnet/api/system.io.compression.gzipstream?view=net-8.0)).
-
 ## BufferBackgroundStream
 A double buffer stream that will allow reading from one buffer while filling the other in the background using a background thread. Usefull for paralizing multiple time consuming stream operations. Example if you both want to calculate hash for a Stream and then compress it. Or receive it via network, compress and store in database (here you might want to use this class twice).
+
+## StreamInverter (Obsolete and removed)
+Can reverse a Stream wrapper direction. Usefull if you have a Stream that takes an output Stream in the constructor, but you wanted it to take an input Stream instead. Ex. when using the Stream compression methods in .net (ex. [GZipStream](https://learn.microsoft.com/en-us/dotnet/api/system.io.compression.gzipstream?view=net-8.0)). This is obsolete, use [Pipe](https://learn.microsoft.com/en-us/dotnet/api/system.io.pipelines.pipe?view=net-10.0) in .Net instead.
