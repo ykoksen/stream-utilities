@@ -50,7 +50,7 @@ namespace Lindhart.Utility.IO.Streaming
         public override int Read(byte[] buffer, int offset, int count)
         {
             if (offset + count > buffer.Length)
-               throw new ArgumentOutOfRangeException("The sum of offset and count is larger than the buffer length.");
+               throw new ArgumentOutOfRangeException(nameof(count), "The sum of offset and count is larger than the buffer length.");
 
             if (offset < 0)
                 throw new ArgumentOutOfRangeException(nameof(offset), "Must not be negative");
