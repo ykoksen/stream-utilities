@@ -14,7 +14,7 @@ namespace Lindhart.Utility.IO.Streaming
         public async Task Given_StreamWithGivenLength_When_Read_Then_CorrectNumberOfBytesRead(long length)
         {
             // Setup
-            using LargeTestStream testStream = new(length);
+            using TestLargeInputStream testStream = new(length);
             using var subject = new StreamCounter(new StupidStream(testStream));
 
             // Act
@@ -31,7 +31,7 @@ namespace Lindhart.Utility.IO.Streaming
         public async Task Given_StreamWithGivenLength_When_Write_Then_CorrectNumberOfBytesRead(long length)
         {
             // Setup
-            using LargeTestStream testStream = new(length);
+            using TestLargeInputStream testStream = new(length);
             using var subject = new StreamCounter(Stream.Null);
 
             // Act
@@ -45,7 +45,7 @@ namespace Lindhart.Utility.IO.Streaming
         public async Task Given_HugeStream_When_ReadingBytesWithDifferentMethods_Then_CorrectNumberOfBytesCounted()
         {
             // Setup
-            using LargeTestStream testStream = new(2_000_000_000);
+            using TestLargeInputStream testStream = new(2_000_000_000);
             using var subject = new StreamCounter(testStream);
             var readCounter = 0;
 
@@ -117,11 +117,11 @@ namespace Lindhart.Utility.IO.Streaming
         private sealed class TestReadScope : IDisposable
         {
             public StreamCounter Subject { get; }
-            public LargeTestStream TestStream { get; }
+            public TestLargeInputStream TestStream { get; }
 
             public TestReadScope(long length)
             {
-                TestStream = new LargeTestStream(length);
+                TestStream = new TestLargeInputStream(length);
                 Subject = new StreamCounter(TestStream);
             }
 
