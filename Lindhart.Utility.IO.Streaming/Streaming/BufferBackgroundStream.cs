@@ -7,7 +7,7 @@ namespace Lindhart.Utility.IO.Streaming
 {
     /// <summary>
     /// A class to wrap around an existing <see cref="Stream"/>. This will enable processing content from the buffer, while a background thread is reading new bytes from the underlying <see cref="Stream"/>. 
-    /// This is especially usefull when reading from a network (hence <see cref="System.Net.Sockets.NetworkStream"/>) while wanting to do another time consuming job example compressing or calculating hash.
+    /// This is especially useful when reading from a network (hence <see cref="System.Net.Sockets.NetworkStream"/>) while wanting to do another time consuming job example compressing or calculating hash.
     /// </summary>
     public class BufferBackgroundStream : Stream
     {
@@ -32,7 +32,7 @@ namespace Lindhart.Utility.IO.Streaming
 
         public override long Length => _innerStream.Length;
 
-        public override long Position { get => _position; set => throw new System.NotSupportedException(); }
+        public override long Position { get => _position; set => throw new NotSupportedException(); }
 
         public override void Close()
         {
@@ -57,19 +57,19 @@ namespace Lindhart.Utility.IO.Streaming
             _writer = WriteAsync();
         }
 
-        public async Task Switch()
+        private async Task Switch()
         {
             // Before we can switch we need to be done writing.
             await _writer;
 
-            // Switch read and write buffers around. We have done reading the read buffer and we are done writing the write buffer.
+            // Switch read and write buffers around. We have done reading the read buffer, and we are done writing the write buffer.
             (_readBuffer, _writeBuffer) = (_writeBuffer, _readBuffer);
 
             // Start writing again in the background
             _writer = WriteAsync();            
         }
 
-        public async Task WriteAsync()
+        private async Task WriteAsync()
         { 
             var bytes = _writeBuffer.GetBuffer();
             var bufferSize = bytes.Length;
@@ -77,7 +77,7 @@ namespace Lindhart.Utility.IO.Streaming
             int readCount = 0;
             int count;
 
-            // Read until the buffer is full or we've reached the end of the stream.
+            // Read until the buffer is full, or we've reached the end of the stream.
             do
             {
                 count = await _innerStream.ReadAsync(bytes, readCount, bufferSize - readCount, _cancellationTokenSource.Token);
@@ -119,17 +119,17 @@ namespace Lindhart.Utility.IO.Streaming
 
         public override long Seek(long offset, SeekOrigin origin)
         {
-            throw new System.NotSupportedException();
+            throw new NotSupportedException();
         }
 
         public override void SetLength(long value)
         {
-            throw new System.NotSupportedException();
+            throw new NotSupportedException();
         }
 
         public override void Write(byte[] buffer, int offset, int count)
         {
-            throw new System.NotSupportedException();
+            throw new NotSupportedException();
         }
 
         private bool _disposed = false;
@@ -163,7 +163,7 @@ namespace Lindhart.Utility.IO.Streaming
             base.Dispose(disposing);
         }
 
-        public override sealed async ValueTask DisposeAsync()
+        public sealed override async ValueTask DisposeAsync()
         {
             if (_disposed) return;
 
